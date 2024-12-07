@@ -87,6 +87,44 @@ def proxy_media(encoded_url):
     except Exception as e:
         logging.error(f'Error streaming media: {e}')
         return 'Failed...', 500
+    
+@app.route('/')
+def root():
+    return '''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Podcast Proxy Usage</title>
+    </head>
+    <body>
+        <p>
+            Proxied podcasts can be added to clients by placing the original podcast RSS URL (with protocol omitted) after the <code>/feed/</code> path of the proxy server.
+        </p>
+        <p>
+            For example, the podcast located at:
+        </p>
+        <pre><code>https://feeds.simplecast.com/LDNgBXht</code></pre>
+        <p>
+            Should be added to the podcast client as:
+        </p>
+        <pre><code id="proxy-url"></code></pre>
+
+        <script>
+            const hostname = window.location.hostname;
+            const port = window.location.port;
+            const rssPath = "/feed/feeds.simplecast.com/LDNgBXht";
+
+            const proxyUrl = port 
+                ? `https://${hostname}:${port}${rssPath}` 
+                : `https://${hostname}${rssPath}`;
+
+            document.getElementById("proxy-url").textContent = proxyUrl;
+        </script>
+    </body>
+    </html>
+    ''', 200
 
 if __name__ == '__main__':
     app.run()
