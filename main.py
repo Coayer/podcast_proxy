@@ -7,9 +7,9 @@ from flask import Flask, Response, request, url_for
 from lxml import etree
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)s] %(message)s')
-PROXY_SERVER = os.getenv('PROXY_SERVER')
+EXTERNAL_PROXY = os.getenv('EXTERNAL_PROXY')
 
-logging.info(f'Using proxy server: {PROXY_SERVER}')
+logging.info(f'Using proxy server: {EXTERNAL_PROXY}')
 
 app = Flask(__name__)
 
@@ -73,7 +73,7 @@ def proxy_media(encoded_url):
         headers['Referer'] = 'https://' + referer_url.path.split('/')[2:]
 
     try:        
-        media_response = requests.get(original_url, proxies={'https': PROXY_SERVER}, headers=headers, allow_redirects=True, stream=True)
+        media_response = requests.get(original_url, proxies={'https': EXTERNAL_PROXY}, headers=headers, allow_redirects=True, stream=True)
         media_response.raise_for_status()
         
         return Response(
