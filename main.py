@@ -66,7 +66,7 @@ def proxy_media(encoded_url):
     headers = dict(request.headers)
         
     if 'Host' in headers:
-        headers['Host'] = urlsplit(headers['Host']).hostname
+        del headers['Host']
 
     if 'Referer' in headers:
         referer_url = urlsplit(headers['Referer'])
@@ -75,7 +75,7 @@ def proxy_media(encoded_url):
     try:        
         media_response = requests.get(original_url, proxies={'https': EXTERNAL_PROXY}, headers=headers, allow_redirects=True, stream=True)
         media_response.raise_for_status()
-        
+        print('#############', media_response.request.headers)
         return Response(
             media_response.iter_content(chunk_size=120000),
             status=media_response.status_code,
