@@ -3,6 +3,7 @@ import os
 import base64
 import logging
 import magic
+from itertools import tee
 from flask import Flask, Response, request, url_for
 from lxml import etree
 
@@ -102,10 +103,12 @@ def proxy_media(encoded_url):
         media_response = requests.get(original_url, proxies={'https': EXTERNAL_PROXY}, headers=headers, allow_redirects=True, stream=True)
         media_response.raise_for_status()
 
-        check_file(media_response.content, STREAM_MIME_TYPES, 500000000)
+        check_gen, response_gen = tee(media_response.iter_content(chunk_size=120000)) # Checking first iter of gen will stop it being returned
+
+        check_file(next(check_gen), STREAM_MIME_TYPES, 500000000)
 
         return Response(
-            media_response.iter_content(chunk_size=120000),
+            response_gen,
             status=media_response.status_code,
             headers=media_response.headers
         )
