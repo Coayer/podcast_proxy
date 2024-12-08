@@ -2,26 +2,57 @@ import requests
 import os
 import base64
 import logging
-from urllib.parse import urlsplit
+import magic
 from flask import Flask, Response, request, url_for
 from lxml import etree
 
-logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)s] %(message)s')
-EXTERNAL_PROXY = os.getenv('EXTERNAL_PROXY')
+# TODO santitation of URLs
 
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)s] %(message)s')
+
+EXTERNAL_PROXY = os.getenv('EXTERNAL_PROXY')
 logging.info(f'Using proxy server: {EXTERNAL_PROXY}')
 
 app = Flask(__name__)
+
+STREAM_MIME_TYPES = set([
+    'audio/mpeg', 
+    'audio/x-mpeg', 
+    'audio/mp3', 
+    'audio/wav', 
+    'audio/ogg', 
+    'application/octet-stream'
+])
+
+RSS_MIME_TYPES = set([
+    'application/xml',
+    'application/rss+xml',
+    'text/xml'
+])
+
+def check_file(bytes, allowed_mime_types, max_size):
+    detected_mime = magic.from_buffer(bytes[:2048], mime=True)
+    
+    if detected_mime not in allowed_mime_types:
+        raise ValueError(f'Detected MIME type is not allowed: {detected_mime}')
+
+    if len(bytes) > max_size:
+        raise ValueError(f'File size exceeds maximum allowed limit: {len(bytes)/1000000}/{max_size/{1000000}}')
 
 def fetch_rss_feed(feed_url):
     '''Get RSS feed XML'''
     try:
         response = requests.get(feed_url)   
         response.raise_for_status()
+
+        check_file(response.content, RSS_MIME_TYPES, 50000000)
+
         return response.text
     except requests.RequestException as e:
         logging.error(f'Error fetching feed: {e}')
         return None
+    except ValueError as e:
+        logging.error(f'Requested feed was unsafe: {e}')
 
 def rewrite_enclosure_urls(feed_content):
     '''Rewrite media enclosure URLs to proxy through server'''
@@ -63,19 +94,16 @@ def proxy_media(encoded_url):
 
     logging.info(f'Streaming: {original_url}')
 
-    headers = dict(request.headers)
-        
-    if 'Host' in headers:
-        del headers['Host']
-
-    if 'Referer' in headers:
-        referer_url = urlsplit(headers['Referer'])
-        headers['Referer'] = 'https://' + referer_url.path.split('/')[2:]
+    # Cloudflare adds many other headers which can prevent the connection being accepted
+    allowed_headers = set(['User-Agent', 'Accept-Encoding', 'Accept', 'Connection', 'Range', 'Icy-Metadata'])        
+    headers = {header: value for header, value in request.headers.items() if header in allowed_headers}
 
     try:        
         media_response = requests.get(original_url, proxies={'https': EXTERNAL_PROXY}, headers=headers, allow_redirects=True, stream=True)
         media_response.raise_for_status()
-        print('#############', media_response.request.headers)
+
+        check_file(media_response.content, STREAM_MIME_TYPES, 500000000)
+
         return Response(
             media_response.iter_content(chunk_size=120000),
             status=media_response.status_code,
@@ -84,6 +112,8 @@ def proxy_media(encoded_url):
     except requests.exceptions.HTTPError as e:
         logging.error(f'HTTP error occurred: {e}')
         return 'Failed to stream from upstream server', e.response.status_code
+    except ValueError as e:
+        logging.error(f'Requested stream was unsafe: {e}')
     except Exception as e:
         logging.error(f'Error streaming media: {e}')
         return 'Failed...', 500
