@@ -3,3 +3,4 @@ lxml==5.3.0
 python_magic==0.4.27
 Requests==2.32.3
 validators==0.34.0
+gunicorn==23.0.0
