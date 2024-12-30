@@ -1,3 +1,5 @@
+import logging
+
 import magic
 import validators
 import ipaddress

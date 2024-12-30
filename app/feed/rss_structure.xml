@@ -1,0 +1,15 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/" xmlns:podcast="https://podcastindex.org/namespace/1.0">
+  <channel>
+    <atom:link href="" rel="self" type="application/rss+xml" />
+    <title></title>
+    <description></description>
+    <link></link>
+    <language>en-us</language>
+    <itunes:category text="Education">
+      <itunes:category text="Courses" />
+    </itunes:category>
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:image href="https://upload.wikimedia.org/wikinews/en/0/0c/Google_logo_png.png"/>
+    <itunes:author></itunes:author>
+  </channel>
+</rss>
