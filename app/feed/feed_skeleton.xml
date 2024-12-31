@@ -9,7 +9,7 @@
       <itunes:category text="Courses" />
     </itunes:category>
     <itunes:explicit>false</itunes:explicit>
-    <itunes:image href="https://upload.wikimedia.org/wikinews/en/0/0c/Google_logo_png.png"/>
+    <itunes:image href=""/>
     <itunes:author></itunes:author>
   </channel>
 </rss>
