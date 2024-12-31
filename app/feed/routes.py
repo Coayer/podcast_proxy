@@ -1,11 +1,29 @@
+import hashlib
 import requests
 import base64
 import logging
+from datetime import datetime
 from app.utils import check_url, check_file
 from flask import Response, url_for
 from lxml import etree
 
 from app.feed import bp
+
+NAMESPACES = {
+    "itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd",
+    "media": "http://search.yahoo.com/mrss/",
+    "atom": "http://www.w3.org/2005/Atom"
+}
+
+def create_proxied_stream_url(original_url):
+    """Create encoded URL to stream file through proxy server"""
+    encoded_url = base64.urlsafe_b64encode(
+        original_url.encode()
+    ).decode()  # Encode string to file_bytes, b64 encode, then decode b64 file_bytes to string
+    return url_for(
+        "stream.proxy_media", encoded_url=encoded_url, _external=True
+    )
+
 
 def fetch_rss_feed(feed_url):
     """Get RSS feed XML"""
@@ -26,24 +44,17 @@ def fetch_rss_feed(feed_url):
         return None
 
 
-def rewrite_enclosure_urls(feed_content):
+def rewrite_rss_enclosure_urls(feed_content):
     """Rewrite media enclosure URLs to proxy through server"""
     try:
         root = etree.fromstring(
             feed_content.encode(), parser=etree.XMLParser(strip_cdata=False)
         )
 
-        for item in root.findall("./channel/item"):  # Episodes
+        for item in root.findall("channel/item"):  # Episodes
             enclosure = item.find("enclosure")
-            if enclosure is not None:
-                original_url = enclosure.get("url")
-                encoded_url = base64.urlsafe_b64encode(
-                    original_url.encode()
-                ).decode() # Encode string to file_bytes, b64 encode, then decode b64 file_bytes to string
-                proxy_url = url_for(
-                    "stream.proxy_media", encoded_url=encoded_url, _external=True
-                )
-                enclosure.set("url", proxy_url)
+            proxied_url = create_proxied_stream_url(enclosure.get("url"))
+            enclosure.set("url", proxied_url)
 
         return etree.tostring(root)
     except Exception as e:
@@ -51,17 +62,98 @@ def rewrite_enclosure_urls(feed_content):
         return None
 
 
+def rewrite_youtube_feed(feed_content):
+    """Create an RSS feed from a YouTube channel XML feed"""
+    try:
+        youtube_feed = etree.fromstring(feed_content.encode(),
+                                        parser=etree.XMLParser(strip_cdata=False, remove_blank_text=True))
+
+        rss_feed = etree.parse("./app/feed/feed_skeleton.xml")
+        channel = rss_feed.find("channel")
+
+        for entry in youtube_feed.findall("atom:entry", namespaces=NAMESPACES):
+            channel.append(convert_yt_entry_to_rss_item(entry))
+
+        latest_thumbnail = channel.find("item/itunes:image", namespaces=NAMESPACES).get("href")
+        convert_yt_channel_to_podcast_channel(youtube_feed, channel, image_url=latest_thumbnail)
+
+        return etree.tostring(rss_feed, pretty_print=True)
+    except Exception as e:
+        logging.error(f"Error rewriting YouTube channel feed: {e}")
+        return None
+
+
+def convert_yt_channel_to_podcast_channel(youtube_feed, channel, image_url):
+    """Write YouTube XML channel metadata into RSS podcast metadata"""
+    link = youtube_feed.find('atom:link[@rel="alternate"]', namespaces=NAMESPACES).get("href")
+    title = youtube_feed.findtext("atom:title", namespaces=NAMESPACES)
+    description = f"Podcast feed for {title}"
+    author = youtube_feed.findtext("atom:author/atom:name", namespaces=NAMESPACES)
+
+    channel.find("title").text = title
+    channel.find("description").text = description
+    channel.find("atom:link", namespaces=NAMESPACES).set("href", link)
+    channel.find("link").text = link
+    channel.find("itunes:author", namespaces=NAMESPACES).text = author
+    channel.find("itunes:image", namespaces=NAMESPACES).set("href", image_url)
+
+    return channel
+
+
+def convert_yt_entry_to_rss_item(entry):
+    """Convert a YouTube XML feed <entry> into an RSS <item>"""
+    item = etree.Element("item")  # new item to populate
+
+    title = entry.findtext("atom:title", namespaces=NAMESPACES)
+    link = entry.find("atom:link[@rel='alternate']", namespaces=NAMESPACES).get("href")
+    description = entry.findtext("media:group/media:description",
+                                 namespaces=NAMESPACES)
+
+    pub_date = entry.findtext("atom:published", namespaces=NAMESPACES)
+    pub_date = datetime.fromisoformat(pub_date).strftime("%a, %d %b %Y %H:%M:%S +0000")
+
+    def create_etree_element(element_name, element_text):
+        element = etree.Element(element_name)
+        element.text = element_text
+        return element
+
+    for name, text in [("title", title), ("description", description), ("pubDate", pub_date), ("link", link)]:
+        item.append(create_etree_element(name, text))
+
+    image_url = entry.find("media:group/media:thumbnail", namespaces=NAMESPACES).get("url")
+    item.append(etree.Element(f"{{{NAMESPACES['itunes']}}}image", href=image_url))
+
+    guid = etree.Element("guid", isPermaLink="false")
+    video_id = entry.findtext("yt:videoId", namespaces={"yt": "http://www.youtube.com/xml/schemas/2015"})
+    guid.text = hashlib.sha256(video_id.encode("utf-8")).hexdigest()[:32]
+    item.append(guid)
+
+    proxied_url = create_proxied_stream_url(link)
+    item.append(etree.Element("enclosure", length="0", type="audio/mp4", url=proxied_url))
+
+    return item
+
+
 @bp.route("/<path:feed_path>")
 def proxy_feed(feed_path):
+    """Stream file through server"""
+    youtube = feed_path.startswith("youtube/")
+    if youtube:
+        feed_path = f"www.youtube.com/feeds/videos.xml?channel_id={feed_path.split('/')[1]}"
+
     original_feed_url = f"https://{feed_path}"
 
-    logging.info(f"Rewriting episode URLs: {original_feed_url}")
+    logging.info(f"Creating feed: {original_feed_url}")
 
     feed_content = fetch_rss_feed(original_feed_url)
     if not feed_content:
         return "Failed to fetch feed", 500
 
-    rewritten_feed = rewrite_enclosure_urls(feed_content)
+    if youtube:
+        rewritten_feed = rewrite_youtube_feed(feed_content)
+    else:
+        rewritten_feed = rewrite_rss_enclosure_urls(feed_content)
+
     if not rewritten_feed:
         return "Failed to rewrite feed", 500
 

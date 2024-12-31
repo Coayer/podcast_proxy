@@ -37,6 +37,5 @@ def check_file(file_bytes, allowed_mime_types, max_size):
 
     if len(file_bytes) > max_size:
         raise ValueError(
-            f"File size exceeds maximum allowed limit: {
-            len(file_bytes) / 1000000}KB/{max_size / {1000000} }KB"
+            f"File size exceeds maximum allowed limit: {len(file_bytes) / 1000000}KB/{max_size / {1000000} }KB"
         )

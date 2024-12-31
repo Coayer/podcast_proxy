@@ -259,6 +259,40 @@
             text-align: center;
         }
     }
+    select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    cursor: pointer;
+    }
+
+    select:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    select option {
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        padding: 0.875rem;
+    }
+
+    .help-text {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
     </style>
 </head>
 <body>
@@ -272,12 +306,28 @@
             <section class="card">
                 <h2 class="card-title">Input Feed</h2>
                 <div class="input-group">
+                    <label for="feed-type">Feed Type</label>
+                    <select id="feed-type" onchange="toggleInputFields()">
+                        <option value="podcast">Podcast RSS Feed</option>
+                        <option value="youtube">YouTube Channel</option>
+                    </select>
+                </div>
+                <div id="podcast-input" class="input-group">
                     <label for="podcast-url">Podcast Feed URL</label>
                     <input
                         type="text"
                         id="podcast-url"
                         placeholder="e.g., https://feeds.simplecast.com/LDNgBXht"
                         aria-label="Podcast URL input">
+                </div>
+                <div id="youtube-input" class="input-group" style="display: none;">
+                    <label for="youtube-channel">YouTube Channel ID</label>
+                    <input
+                        type="text"
+                        id="youtube-channel"
+                        placeholder="e.g., UCGy7hYVpw7MsIgjJCTmuBBg"
+                        aria-label="YouTube channel ID input">
+                    <small class="help-text">To get a channel ID: Go to the YouTube channel → Click ...more → Share channel → Copy channel ID</small>
                 </div>
                 <button onclick="generateFeedUrl()">Generate Feed URL</button>
             </section>
@@ -299,21 +349,41 @@
     <div id="notification" class="notification">URL copied to clipboard!</div>
 
     <script>
-        function generateFeedUrl() {
-            let podcastUrl = document.getElementById("podcast-url").value;
+        function toggleInputFields() {
+            const feedType = document.getElementById("feed-type").value;
+            const podcastInput = document.getElementById("podcast-input");
+            const youtubeInput = document.getElementById("youtube-input");
 
-            if (podcastUrl.startsWith("http://")) {
-                podcastUrl = podcastUrl.substring(7);
-            } else if (podcastUrl.startsWith("https://")) {
-                podcastUrl = podcastUrl.substring(8);
+            if (feedType === "podcast") {
+                podcastInput.style.display = "block";
+                youtubeInput.style.display = "none";
+            } else {
+                podcastInput.style.display = "none";
+                youtubeInput.style.display = "block";
+            }
+        }
+
+        function generateFeedUrl() {
+            const feedType = document.getElementById("feed-type").value;
+            let inputUrl;
+
+            if (feedType === "podcast") {
+                inputUrl = document.getElementById("podcast-url").value;
+                if (inputUrl.startsWith("http://")) {
+                    inputUrl = inputUrl.substring(7);
+                } else if (inputUrl.startsWith("https://")) {
+                    inputUrl = inputUrl.substring(8);
+                }
+            } else {
+                inputUrl = `youtube/${document.getElementById("youtube-channel").value}`;
             }
 
             const protocol = window.location.protocol === "https:" ? "https" : "http";
 
-            if (podcastUrl) {
+            if (inputUrl) {
                 const hostname = window.location.hostname;
                 const port = window.location.port;
-                const rssPath = `/feed/${podcastUrl}`;
+                const rssPath = `/feed/${inputUrl}`;
 
                 const feedUrl = port
                     ? `${protocol}://${hostname}:${port}${rssPath}`
