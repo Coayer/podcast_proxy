@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 
 
 def check_url(url):
+    """Checks if URL is safe to stream from"""
     if not validators.url(url):
         raise ValueError(f"URL could not be validated: {url}")
 
@@ -23,13 +24,13 @@ def check_url(url):
 
 
 def filter_headers(headers):
-    """Cloudflare adds many other headers which can prevent streaming from external server"""
+    """If server is run behind Cloudflare, many other headers are added which can prevent streaming from external server, so only keep a few"""
     allowed_headers = {"User-Agent", "Accept-Encoding", "Accept", "Connection", "Range", "Icy-Metadata"}
     return {header: value for header, value in headers if header in allowed_headers}
 
 
-def check_file(file_bytes, allowed_mime_types, max_size):
-    """Checks file_bytes are approved types and size"""
+def check_file_safety(file_bytes, allowed_mime_types, max_size):
+    """Checks given bytes are approved types and size"""
     detected_mime = magic.from_buffer(file_bytes[:2048], mime=True)
 
     if detected_mime not in allowed_mime_types:
