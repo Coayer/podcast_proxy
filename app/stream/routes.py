@@ -47,7 +47,7 @@ def proxy_media(encoded_url):
 
         # Check if file being streamed is safe
         if (
-                upstream_response.status_code == 206 or upstream_response.status_code == 200
+                False # upstream_response.status_code == 206 or upstream_response.status_code == 200
         ): # other status codes not relevant
             check_generator, response_generator = tee(
                 upstream_response.iter_content(chunk_size=8192)

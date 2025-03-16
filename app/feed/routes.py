@@ -21,7 +21,7 @@ def create_proxied_stream_url(original_url):
         original_url.encode()
     ).decode()  # Encode string to file_bytes, b64 encode, then decode b64 file_bytes to string
     return url_for(
-        "stream.proxy_media", encoded_url=encoded_url, _external=True
+        "stream.proxy_media", encoded_url=encoded_url, _external=True, _scheme="https"
     )
 
 
