@@ -23,6 +23,8 @@ services:
 
 `EXTERNAL_PROXY`: (Optional) Proxy streams through an additional HTTP proxy. For example, using [qdm12/gluetun](https://github.com/qdm12/gluetun) with the `HTTPPROXY` variable set, the podcast proxy server will stream podcasts through the gluetun container.
 
+`STREAMING_SAFETY_CHECK`: (Optional) When set to `true`, the proxy will check the MIME type of the streamed file to ensure it is a valid audio or video file.
+
 ### Clients
 
 The proxy rewrites podcast feeds so episode file URLs point to the proxy server.

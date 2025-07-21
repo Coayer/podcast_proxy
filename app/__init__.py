@@ -3,6 +3,7 @@ import os
 from flask import Flask
 
 EXTERNAL_PROXY = os.getenv("EXTERNAL_PROXY")
+STREAMING_SAFETY_CHECK = os.getenv("STREAMING_SAFETY_CHECK", "false").lower() == "true"
 
 def create_app():
     app = Flask(__name__)

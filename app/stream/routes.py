@@ -47,11 +47,11 @@ def proxy_media(encoded_url):
 
         # Check if file being streamed is safe
         if (
-                False # upstream_response.status_code == 206 or upstream_response.status_code == 200
+                app.STREAMING_SAFETY_CHECK and (upstream_response.status_code == 206 or upstream_response.status_code == 200)
         ): # other status codes not relevant
             check_generator, response_generator = tee(
                 upstream_response.iter_content(chunk_size=8192)
-            )  # Checking first iter of generator will remove that chunk from the generator, so duplicate generators
+            )  # Checking first iter of generator will remove that chunk from the generator, so create duplicate generators
             stream_mime_types = {"audio/mpeg", "audio/x-mpeg", "audio/mp3", "audio/wav", "audio/ogg",
                                  "video/mp4",  # mp4 needed for youtube
                                  "application/octet-stream", "text/plain"}
