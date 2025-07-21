@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Proxy</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>Podcast Proxy</h1>
+            <p class="header-subtitle">Stream podcasts through this server for privacy and ad blocking.</p>
+        </header>
+
+        <main class="content-grid">
+            <section class="card">
+                <h2 class="card-title">Input Feed</h2>
+                <div class="input-group">
+                    <label for="feed-type">Feed Type</label>
+                    <select id="feed-type">
+                        <option value="podcast">Podcast RSS Feed</option>
+                        <option value="youtube">YouTube Channel</option>
+                    </select>
+                </div>
+                <div id="podcast-input" class="input-group">
+                    <label for="podcast-url">Podcast Feed URL</label>
+                    <input
+                        type="text"
+                        id="podcast-url"
+                        placeholder="e.g., https://feeds.simplecast.com/LDNgBXht"
+                        aria-label="Podcast URL input">
+                </div>
+                <div id="youtube-input" class="input-group" style="display: none;">
+                    <label for="youtube-channel">YouTube Channel ID</label>
+                    <input
+                        type="text"
+                        id="youtube-channel"
+                        placeholder="e.g., UCGy7hYVpw7MsIgjJCTmuBBg"
+                        aria-label="YouTube channel ID input">
+                    <small class="help-text">To get a channel ID: Go to the YouTube channel → Click ...more → Share channel → Copy channel ID</small>
+                </div>
+                <button id="generate-btn">Generate Feed URL</button>
+            </section>
+
+            <section class="card">
+                <h2 class="card-title">Generated Feed</h2>
+                <div class="result-container">
+                    <pre><code id="converted-feed-url"></code></pre>
+                </div>
+                <div class="copy-btn-container">
+                    <button id="copy-btn" style="display:none;">
+                        Copy Feed URL
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="notification" class="notification">URL copied to clipboard!</div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

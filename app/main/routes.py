@@ -1,9 +1,9 @@
+from flask import send_from_directory, request
 import logging
-from flask import render_template, request
-
 from app.main import bp
+
 
 @bp.route("/")
 def index():
     logging.info(f"/ request: {request.user_agent}")
-    return render_template("index.html")
+    return send_from_directory("static", "index.html")

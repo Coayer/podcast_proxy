@@ -16,14 +16,14 @@ services:
     ports:
       - 80:80
     environment:
-      EXTERNAL_PROXY: "http://localhost:8888"
+      EXTERNAL_PROXY: "http://gluetun:8888"
 ```
 
 #### Environment variables
 
 `EXTERNAL_PROXY`: (Optional) Proxy streams through an additional HTTP proxy. For example, using [qdm12/gluetun](https://github.com/qdm12/gluetun) with the `HTTPPROXY` variable set, the podcast proxy server will stream podcasts through the gluetun container.
 
-`STREAMING_SAFETY_CHECK`: (Optional) When set to `true`, the proxy will check the MIME type of the streamed file to ensure it is a valid audio or video file.
+`ENABLE_STREAMING_SAFETY_CHECK`: (Optional) When set to `true`, the proxy will check the MIME type of the streamed file to ensure it is a valid audio or video file.
 
 ### Clients
 
@@ -47,11 +47,9 @@ Should be added to the podcast client as:
 
 `https://podcast-proxy.private/feed/feeds.simplecast.com/LDNgBXht`
 
-The resulting RSS feed will prefix the original file URLs with `https://podcast-proxy.private/stream/` so clients download from the proxy server.
-
 #### YouTube channels
 
-YouTube channel podcast feeds can be created with the path `/youtube/CHANNEL_ID`
+YouTube channel podcast feeds can be created with the path `/feed/youtube/CHANNEL_ID`
 
 To get a channel ID: 
 
