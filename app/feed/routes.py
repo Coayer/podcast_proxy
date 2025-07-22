@@ -4,7 +4,7 @@ import base64
 import logging
 from datetime import datetime
 from app.utils import check_hostname, check_file_mime
-from flask import Response, url_for, current_app as app
+from flask import Response, url_for, current_app as app, request
 from lxml import etree
 
 from app.feed import bp
@@ -34,7 +34,7 @@ def fetch_rss_feed(feed_url):
         response.raise_for_status()
 
         rss_mime_types = {"application/xml", "application/rss+xml", "text/xml"}
-        check_file_mime(response.content, rss_mime_types, 50000000)
+        check_file_mime(response.content, rss_mime_types)
 
         return response.text
     except requests.RequestException as e:
@@ -174,7 +174,7 @@ def proxy_feed(feed_path):
 
     original_feed_url = f"https://{feed_path}"
 
-    logging.info(f"Creating feed: {original_feed_url}")
+    logging.info(f"[{request.user_agent}] Creating feed: {original_feed_url}")
 
     feed_content = fetch_rss_feed(original_feed_url)
     if not feed_content:

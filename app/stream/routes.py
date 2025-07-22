@@ -100,7 +100,7 @@ def proxy_media(encoded_url):
     """Streams file located at given base64-encoded URL"""
     try:
         stream_url = base64.urlsafe_b64decode(encoded_url.encode()).decode()
-        logging.info(f"Streaming: {stream_url}")
+        logging.info(f"[{request.user_agent}] Streaming: {stream_url}")
 
         if urlparse(stream_url).netloc == "www.youtube.com":
             return youtube_stream(stream_url)

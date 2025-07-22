@@ -5,5 +5,5 @@ from app.main import bp
 
 @bp.route("/")
 def index():
-    logging.info(f"/ request: {request.user_agent}")
+    logging.info(f"[{request.user_agent}] Requested: /")
     return send_from_directory("static", "index.html")
