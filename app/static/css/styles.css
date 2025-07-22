@@ -1,3 +1,4 @@
+/* Vibe coded */
 :root {
     /* Modern light theme */
     --bg-primary: #ffffff;
@@ -15,8 +16,10 @@
     --error: #ef4444;
     --warning: #f59e0b;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+        0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+        0 4px 6px -4px rgb(0 0 0 / 0.1);
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
@@ -37,13 +40,17 @@
         --accent-hover: #60a5fa;
         --accent-light: #1e3a8a;
         --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.2), 0 2px 4px -2px rgb(0 0 0 / 0.2);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.2),
+            0 2px 4px -2px rgb(0 0 0 / 0.2);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3),
+            0 4px 6px -4px rgb(0 0 0 / 0.3);
     }
 }
 
 /* Reset */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -55,8 +62,9 @@ html {
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     line-height: 1.6;
@@ -81,7 +89,11 @@ h1 {
     font-weight: 700;
     line-height: 1.1;
     letter-spacing: -0.02em;
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+    background: linear-gradient(
+        135deg,
+        var(--accent-primary),
+        var(--accent-hover)
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -100,7 +112,9 @@ h1 {
 /* Cards */
 .content-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+    /* IMPROVEMENT: Reduced min-width to better suit mobile viewports.
+       This single line handles responsiveness without needing a media query. */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
     gap: 1.5rem;
     align-items: start;
 }
@@ -147,18 +161,7 @@ label {
     margin-bottom: 0.5rem;
 }
 
-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    font-family: inherit;
-    background: var(--bg-primary);
-    border: 1.5px solid var(--border-light);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    transition: all 0.15s ease;
-}
-
+input,
 select {
     width: 100%;
     padding: 0.875rem 1rem;
@@ -169,28 +172,10 @@ select {
     border-radius: var(--radius-md);
     color: var(--text-primary);
     transition: all 0.15s ease;
-    appearance: none;
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 1rem;
-    cursor: pointer;
 }
 
-/* Light theme arrow */
-@media (prefers-color-scheme: light) {
-    select {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-    }
-}
-
-/* Dark theme arrow */
-@media (prefers-color-scheme: dark) {
-    select {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-    }
-}
-
-input:focus, select:focus {
+input:focus,
+select:focus {
     outline: none;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 3px var(--accent-light);
@@ -203,11 +188,12 @@ input::placeholder {
 /* Select styling */
 select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 0.75rem center;
     background-repeat: no-repeat;
     background-size: 1rem;
     cursor: pointer;
+    /* Set default light-mode arrow */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }
 
 select option {
@@ -274,7 +260,7 @@ pre {
     font-size: 0.875rem;
     line-height: 1.6;
     overflow-x: auto;
-    font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+    font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
     color: var(--text-primary);
 }
 
@@ -313,14 +299,11 @@ pre {
 
 /* Responsive design */
 @media (max-width: 640px) {
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-    
+    /* No need to change grid-template-columns here anymore */
     .card {
         padding: 1.5rem;
     }
-    
+
     .notification {
         left: 1rem;
         right: 1rem;
@@ -330,14 +313,23 @@ pre {
 
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
+    /* IMPROVEMENT: Only override the arrow SVG for dark mode */
     select {
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
     }
 }
 
+@media (prefers-color-scheme: light) {
+    .notification {
+        color: var(--text-primary);
+    }
+}
+
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
