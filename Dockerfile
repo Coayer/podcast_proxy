@@ -1,7 +1,8 @@
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
+FROM python:3.13.5-slim AS builder
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
-ENV UV_PYTHON_DOWNLOADS=0
 WORKDIR /app
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
