@@ -45,12 +45,29 @@ def fetch_rss_feed(feed_url):
         return None
 
 
-def rewrite_rss_enclosure_urls(feed_content):
-    """Rewrite media enclosure URLs to proxy through server's address"""
+def rewrite_rss_enclosure_urls(feed_content, proxy_feed_url):
+    """Rewrite media enclosure URLs and self-referencing elements to proxy through server's address"""
     try:
         root = etree.fromstring(
             feed_content.encode(), parser=etree.XMLParser(strip_cdata=False)
         )
+
+        channel = root.find("channel")
+
+        # Rewrite <atom:link rel="self"> to point to proxy
+        atom_self = channel.find('atom:link[@rel="self"]', namespaces=XML_NAMESPACES)
+        if atom_self is not None:
+            atom_self.set("href", proxy_feed_url)
+
+        # Remove <itunes:new-feed-url> to prevent clients from migrating away
+        new_feed_url = channel.find("itunes:new-feed-url", namespaces=XML_NAMESPACES)
+        if new_feed_url is not None:
+            channel.remove(new_feed_url)
+
+        # Rewrite feed-level <link> to proxy URL
+        link = channel.find("link")
+        if link is not None:
+            link.text = proxy_feed_url
 
         for item in root.findall("channel/item"):  # items = episodes
             enclosure = item.find("enclosure")
@@ -180,10 +197,12 @@ def proxy_feed(feed_path):
     if not feed_content:
         return "Failed to fetch feed", 500
 
+    proxy_feed_url = f"https://{request.host}/feed/{feed_path}"
+
     if youtube:
         rewritten_feed = rewrite_youtube_feed(feed_content)
     else:
-        rewritten_feed = rewrite_rss_enclosure_urls(feed_content)
+        rewritten_feed = rewrite_rss_enclosure_urls(feed_content, proxy_feed_url)
 
     if not rewritten_feed:
         return "Failed to rewrite feed", 500
