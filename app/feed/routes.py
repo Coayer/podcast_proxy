@@ -20,9 +20,12 @@ def create_proxied_stream_url(original_url):
     """Create encoded URL to stream file at a given URL through the proxy server"""
     encoded_url = base64.urlsafe_b64encode(
         original_url.encode()
-    ).decode()  # Encode string to file_bytes, b64 encode, then decode b64 file_bytes to string
+    ).decode()
     return url_for(
-        "stream.proxy_media", encoded_url=encoded_url, _external=True, _scheme="https"
+        "stream.proxy_media",
+        encoded_url=encoded_url,
+        _external=True,
+        _scheme=request.scheme,
     )
 
 
@@ -197,7 +200,7 @@ def proxy_feed(feed_path):
     if not feed_content:
         return "Failed to fetch feed", 500
 
-    proxy_feed_url = f"https://{request.host}/feed/{feed_path}"
+    proxy_feed_url = f"{request.scheme}://{request.host}/feed/{feed_path}"
 
     if youtube:
         rewritten_feed = rewrite_youtube_feed(feed_content)
