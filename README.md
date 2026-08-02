@@ -14,7 +14,7 @@ services:
   webserver:
     image: ghcr.io/coayer/podcast_proxy:latest
     ports:
-      - 8080:80
+      - 8080:8080
     environment:
       EXTERNAL_PROXY: "http://gluetun:8888"
 ```

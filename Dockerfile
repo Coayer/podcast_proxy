@@ -18,7 +18,18 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y libmagic1 ffmpeg && rm -rf /var/lib/apt/lists/*
 
+# This process fetches untrusted media and writes attacker-influenced filenames
+# into the cache, so it must not run as root
+RUN useradd --create-home --uid 10001 app
+
 COPY --from=builder --chown=app:app /app /app
 
+# yt-dlp writes downloads here at runtime
+RUN mkdir -p /app/cache && chown app:app /app/cache
+
+USER app
+
+# 8080 rather than 80: an unprivileged user cannot bind ports below 1024
+EXPOSE 8080
 ENV PATH="/app/.venv/bin:$PATH"
-CMD ["gunicorn", "--workers", "2", "--threads", "4", "--worker-class", "gthread", "--bind", "0.0.0.0:80", "wsgi"]
+CMD ["gunicorn", "--workers", "2", "--threads", "4", "--worker-class", "gthread", "--bind", "0.0.0.0:8080", "wsgi"]

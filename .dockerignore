@@ -1,0 +1,29 @@
+# Local virtualenv — built for the host OS, must never reach a Linux image.
+# uv sync recreates it inside the build.
+.venv/
+
+# Downloaded podcast/YouTube audio. Grows every time the app runs locally and
+# would otherwise be baked into the published image.
+cache/
+
+# Version control and CI
+.git/
+.gitignore
+.github/
+
+# Tests are not needed at runtime
+tests/
+
+# Python and tool caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Docker's own files
+Dockerfile
+.dockerignore
+
+# Editor/OS cruft and docs assets
+.DS_Store
+web_ui.jpg
