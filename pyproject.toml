@@ -16,5 +16,12 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "mypy>=1.18.2",
     "pytest>=8.4.1",
 ]
+
+[tool.mypy]
+python_version = "3.13"
+files = ["app", "wsgi.py"]
+# lxml, magic, validators and yt_dlp ship no type information
+ignore_missing_imports = true
