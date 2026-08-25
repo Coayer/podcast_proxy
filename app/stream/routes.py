@@ -136,7 +136,7 @@ def generic_stream(stream_url: str) -> Response | tuple[str, int]:
     upstream_response = safe_get(
         app.session,
         stream_url,
-        proxies={"https": app.EXTERNAL_PROXY},
+        proxies={"http": app.EXTERNAL_PROXY, "https": app.EXTERNAL_PROXY},
         headers=headers,
         stream=True,
     )
