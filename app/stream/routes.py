@@ -71,7 +71,7 @@ def generic_stream(stream_url):
     headers = filter_headers(request.headers.items())
     upstream_response = app.session.get(
         stream_url,
-        proxies={"https": app.EXTERNAL_PROXY},
+        proxies={"http": app.EXTERNAL_PROXY, "https": app.EXTERNAL_PROXY},
         headers=headers,
         allow_redirects=True,
         stream=True,
