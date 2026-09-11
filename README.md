@@ -25,6 +25,8 @@ services:
 
 `ENABLE_STREAMING_SAFETY_CHECK`: (Optional, defaults to `false`) When set to `true`, upstream responses will be checked against valid audio MIME file types. Reduces ability to stream arbitrary files (but making server publicly accessible is at your own risk).
 
+`TRUSTED_PROXY_COUNT`: (Optional, defaults to `0`) Set to the number of reverse proxy hops in front of the app (usually `1`) so it trusts their `X-Forwarded-*` headers and generates `https://` URLs correctly. Only set this if the server isn't directly reachable by clients, otherwise they could spoof these headers.
+
 ### Clients
 
 Proxied podcasts are added to clients by creating rewritten feed URLs.

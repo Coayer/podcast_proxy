@@ -3,11 +3,13 @@ import os
 import requests
 from http import cookiejar
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 EXTERNAL_PROXY: str | None = os.getenv("EXTERNAL_PROXY")
 ENABLE_STREAMING_SAFETY_CHECK: bool = (
     os.getenv("ENABLE_STREAMING_SAFETY_CHECK", "false").lower() == "true"
 )
+TRUSTED_PROXY_COUNT: int = int(os.getenv("TRUSTED_PROXY_COUNT", "0"))
 
 class BlockAllCookies(cookiejar.DefaultCookiePolicy):
     """Refuse to store or send cookies.
@@ -37,6 +39,18 @@ def create_app() -> Flask:
 
     logging.info(f"Using proxy server: {EXTERNAL_PROXY}")
     logging.info(f"Streaming safety check enabled: {ENABLE_STREAMING_SAFETY_CHECK}")
+    logging.info(f"Trusted reverse proxy count: {TRUSTED_PROXY_COUNT}")
+
+    if TRUSTED_PROXY_COUNT > 0:
+        # Trust X-Forwarded-Proto/Host/For from this many reverse proxy hops so
+        # request.scheme/host reflect the client-facing address, not the
+        # (typically plain HTTP) hop from the reverse proxy to this app.
+        app.wsgi_app = ProxyFix(  # type: ignore[method-assign]
+            app.wsgi_app,
+            x_for=TRUSTED_PROXY_COUNT,
+            x_proto=TRUSTED_PROXY_COUNT,
+            x_host=TRUSTED_PROXY_COUNT,
+        )
 
     from app.main import bp as main_bp
 
