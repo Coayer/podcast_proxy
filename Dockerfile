@@ -22,6 +22,10 @@ RUN apt-get update && apt-get install -y libmagic1 ffmpeg && rm -rf /var/lib/apt
 # into the cache, so it must not run as root
 RUN useradd --create-home --uid 10001 app
 
+# yt-dlp needs a JS runtime (deno is enabled by default) to solve YouTube's
+# signature/n challenges; without one, downloads fail with HTTP 403
+COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
+
 COPY --from=builder --chown=app:app /app /app
 
 # yt-dlp writes downloads here at runtime
